@@ -1,9 +1,11 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { Home as HomeIcon, Building, Palette, Sparkles } from 'lucide-react';
 import GlassCard from '../components/common/GlassCard';
 
 const Services = () => {
+    const navigate = useNavigate();
     const services = [
         {
             icon: <HomeIcon className="text-gold" />,
@@ -59,7 +61,10 @@ const Services = () => {
                     <p className="max-w-xl mx-auto mb-12 opacity-80">
                         Every project begins with a conversation. Let's discuss your vision and how we can bring it to life.
                     </p>
-                    <button className="bg-gold text-charcoal px-10 py-4 rounded-full font-bold hover:scale-105 transition-transform hover-glow">
+                    <button
+                        onClick={() => navigate('/contact')}
+                        className="bg-gold text-charcoal px-10 py-4 rounded-full font-bold hover:scale-105 transition-transform hover-glow"
+                    >
                         Start Your Journey
                     </button>
                 </div>
