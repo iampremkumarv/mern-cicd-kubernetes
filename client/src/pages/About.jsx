@@ -54,7 +54,7 @@ const About = () => {
                         <div className="flex gap-4 items-center">
                             <div className="w-12 h-12 rounded-full glass flex items-center justify-center font-bold text-gold">JD</div>
                             <div>
-                                <p className="font-bold">Julian Deville</p>
+                                <p className="font-bold">venom</p>
                                 <p className="text-xs uppercase tracking-widest opacity-60">Principle Architect</p>
                             </div>
                         </div>
