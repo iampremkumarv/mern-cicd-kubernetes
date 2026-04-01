@@ -16,6 +16,20 @@ pipeline {
             }
         }
 
+        stage('Test Frontend') {
+            steps {
+                script {
+                    docker.image('node:20-alpine').inside {
+                        sh '''
+                        cd client
+                        npm install
+                        npm test -- --run
+                        '''
+                    }
+                }
+            }
+        }
+
         stage('Build Frontend') {
             steps {
                 script {
@@ -46,4 +60,4 @@ pipeline {
         }
 
     }
- }
+}
