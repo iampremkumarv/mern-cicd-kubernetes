@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import GlassCard from '../components/common/GlassCard';
-import axios from 'axios';
+import api from '../api';
 
 const Portfolio = () => {
     const [projects, setProjects] = useState([]);
@@ -14,7 +14,7 @@ const Portfolio = () => {
     useEffect(() => {
         const fetchProjects = async () => {
             try {
-                const res = await axios.get('http://localhost:5000/api/projects');
+                const res = await api.get('/projects');
                 setProjects(res.data);
             } catch (err) {
                 console.error("Error fetching projects:", err);

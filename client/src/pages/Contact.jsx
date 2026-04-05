@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Phone, MapPin, Send, Loader2, CheckCircle2 } from 'lucide-react';
 import GlassCard from '../components/common/GlassCard';
-import axios from 'axios';
+import api from '../api';
 import { toast } from 'react-toastify';
 
 const Contact = () => {
@@ -23,7 +23,7 @@ const Contact = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            await axios.post('http://localhost:5000/api/contacts', formData);
+            await api.post('/contacts', formData);
             setIsSuccess(true);
             toast.success("Message sent successfully! We'll get back to you soon.");
             setFormData({ name: '', email: '', phone: '', message: '' });

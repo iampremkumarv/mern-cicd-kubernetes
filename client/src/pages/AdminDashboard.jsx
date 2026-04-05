@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import GlassCard from '../components/common/GlassCard';
-import axios from 'axios';
+import api from '../api';
 import { toast } from 'react-toastify';
 import { Plus, Layout } from 'lucide-react';
 
@@ -27,7 +27,7 @@ const AdminDashboard = () => {
         setIsLoading(true);
 
         try {
-            await axios.post('http://localhost:5000/api/projects', formData);
+            await api.post('/projects', formData);
 
             toast.success('Project added successfully!');
 

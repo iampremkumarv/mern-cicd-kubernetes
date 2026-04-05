@@ -25,14 +25,19 @@ app.get('/', (req, res) => {
 // Connect to database and start server
 const startServer = async () => {
     try {
+        // Enforce DB connection before starting Express server
         await connectDB();
-    } catch (err) {
-        console.error('MongoDB connection failed, running in offline mode:', err.message);
-    }
+        console.log('MongoDB connected successfully');
 
-    app.listen(PORT, () => {
-        console.log(`Server running on port ${PORT}`);
-    });
+        app.listen(PORT, () => {
+            console.log(`Server running on port ${PORT}`);
+        });
+
+    } catch (err) {
+        // Stop server initialization if DB connection fails
+        console.error('MongoDB connection failed:', err.message);
+        process.exit(1);
+    }
 };
 
 startServer();

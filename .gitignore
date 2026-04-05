@@ -46,3 +46,7 @@ Thumbs.db
 
 # Swap files
 *.sw?
+
+# Explicit Environment Files
+client/.env
+server/.env
