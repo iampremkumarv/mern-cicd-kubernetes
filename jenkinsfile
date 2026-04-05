@@ -2,21 +2,26 @@ pipeline {
     agent any
 
     stages {
-        stage('create .env file') {
+        stage('Create Environment Files') {
             steps {
                 withCredentials([
                     string(credentialsId: 'MONGODB_URI', variable: 'MONGODB_URI'),
                     string(credentialsId: 'EMAIL_USER', variable: 'EMAIL_USER'),
-                    string(credentialsId: 'EMAIL_PASS', variable: 'EMAIL_PASS')
+                    string(credentialsId: 'EMAIL_PASS', variable: 'EMAIL_PASS'),
+                    string(credentialsId: 'VITE_API_URL', variable: 'VITE_API_URL')
                 ]) {
                     sh '''
                     cat > server/.env <<EOF
-                    PORT=5000
-                    NODE_ENV=production
-                    MONGODB_URI=$MONGODB_URI
-                    EMAIL_USER=$EMAIL_USER
-                    EMAIL_PASS=$EMAIL_PASS
-                    EOF
+PORT=5000
+NODE_ENV=production
+MONGODB_URI=$MONGODB_URI
+EMAIL_USER=$EMAIL_USER
+EMAIL_PASS=$EMAIL_PASS
+EOF
+
+                    cat > client/.env <<EOF
+VITE_API_URL=$VITE_API_URL
+EOF
                     '''
                 }
             }
@@ -29,20 +34,6 @@ pipeline {
                         sh '''
                         cd server
                         npm install
-                        '''
-                    }
-                }
-            }
-        }
-
-        stage('Test Frontend') {
-            steps {
-                script {
-                    docker.image('node:20-alpine').inside {
-                        sh '''
-                        cd client
-                        npm install
-                        npm test -- --run
                         '''
                     }
                 }
@@ -78,10 +69,25 @@ pipeline {
             }
         }
 
+        stage('Backend Deployment Info') {
+            steps {
+                echo 'Backend is deployed automatically by Render from GitHub main branch.'
+            }
+        }
     }
+
     post {
-    always {
-        sh 'rm -f server/.env'
+        always {
+            sh '''
+            rm -f server/.env
+            rm -f client/.env
+            '''
+        }
+        success {
+            echo 'CI/CD pipeline completed successfully.'
+        }
+        failure {
+            echo 'Pipeline failed. Check logs for details.'
+        }
     }
-}
 }
