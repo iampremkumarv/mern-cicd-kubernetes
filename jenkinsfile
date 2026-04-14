@@ -40,13 +40,28 @@ EOF
             }
         }
 
-        stage('Build Frontend') {
+        stage('Test Backend') {
+            steps {
+                script {
+                    docker.image('node:20-alpine').inside {
+                        sh '''
+                        cd server
+                        npm install
+                        npm test
+                        '''
+                    }
+                }
+            }
+        }
+
+        stage('Build & Test Frontend') {
             steps {
                 script {
                     docker.image('node:20-alpine').inside {
                         sh '''
                         cd client
                         npm install
+                        npx vitest run --passWithNoTests
                         npm run build
                         '''
                     }
