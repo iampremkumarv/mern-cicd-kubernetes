@@ -1,7 +1,18 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKER_IMAGE = "premcloudops/my-app"
+    }
+
     stages {
+
+        stage('Checkout Code') {
+            steps {
+                git 'https://github.com/venomprem11/interiorz.git'
+            }
+        }
+
         stage('Create Environment Files') {
             steps {
                 withCredentials([
@@ -11,6 +22,8 @@ pipeline {
                     string(credentialsId: 'VITE_API_URL', variable: 'VITE_API_URL')
                 ]) {
                     sh '''
+                    set -e
+
                     cat > server/.env <<EOF
 PORT=5000
 NODE_ENV=production
@@ -27,44 +40,65 @@ EOF
             }
         }
 
-        stage('Build Backend') {
+        stage('Install Dependencies') {
             steps {
                 script {
                     docker.image('node:20-alpine').inside {
                         sh '''
-                        cd server
-                        npm install
+                        set -e
+                        cd server && npm ci
+                        cd ../client && npm ci
                         '''
                     }
                 }
             }
         }
 
-        stage('Test Backend') {
+        stage('Run Tests') {
             steps {
                 script {
                     docker.image('node:20-alpine').inside {
                         sh '''
-                        cd server
-                        npm install
-                        npm test
+                        set -e
+                        cd server && npm test
+                        cd ../client && npx vitest run --passWithNoTests
                         '''
                     }
                 }
             }
         }
 
-        stage('Build & Test Frontend') {
+        stage('Build Frontend') {
             steps {
                 script {
                     docker.image('node:20-alpine').inside {
                         sh '''
+                        set -e
                         cd client
-                        npm install
-                        npx vitest run --passWithNoTests
                         npm run build
                         '''
                     }
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t $DOCKER_IMAGE:latest .'
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub',
+                    usernameVariable: 'USER',
+                    passwordVariable: 'PASS'
+                )]) {
+                    sh '''
+                    echo $PASS | docker login -u $USER --password-stdin
+                    docker push $DOCKER_IMAGE:latest
+                    '''
                 }
             }
         }
@@ -86,7 +120,7 @@ EOF
 
         stage('Backend Deployment Info') {
             steps {
-                echo 'Backend is deployed automatically by Render from GitHub main branch.'
+                echo 'Backend deployed via Docker or Render auto-deploy.'
             }
         }
     }
@@ -99,10 +133,10 @@ EOF
             '''
         }
         success {
-            echo 'CI/CD pipeline completed successfully.'
+            echo '✅ CI/CD pipeline completed successfully.'
         }
         failure {
-            echo 'Pipeline failed. Check logs for details.'
+            echo '❌ Pipeline failed. Check logs.'
         }
     }
 }
