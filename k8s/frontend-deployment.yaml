@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: my-frontend:latest
-          imagePullPolicy: Never
+          image: premcloudops/my-frontend:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 3000
