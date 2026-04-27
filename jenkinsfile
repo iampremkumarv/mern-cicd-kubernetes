@@ -25,19 +25,27 @@ pipeline {
 
                 stage('Backend Install') {
                     steps {
-                        sh '''
-                        cd server
-                        npm ci
-                        '''
+                        script {
+                            docker.image('node:20-alpine').inside {
+                                sh '''
+                                cd server
+                                npm ci
+                                '''
+                            }
+                        }
                     }
                 }
 
                 stage('Frontend Install') {
                     steps {
-                        sh '''
-                        cd client
-                        npm ci
-                        '''
+                        script {
+                            docker.image('node:20-alpine').inside {
+                                sh '''
+                                cd client
+                                npm ci
+                                '''
+                            }
+                        }
                     }
                 }
             }
@@ -48,18 +56,39 @@ pipeline {
 
                 stage('Backend Test') {
                     steps {
-                        sh '''
-                        cd server
-                        npm test || true
-                        '''
+                        script {
+                            docker.image('node:20-alpine').inside {
+                                sh '''
+                                cd server
+                                npm test || true
+                                '''
+                            }
+                        }
                     }
                 }
 
                 stage('Frontend Test') {
                     steps {
+                        script {
+                            docker.image('node:20-alpine').inside {
+                                sh '''
+                                cd client
+                                npm test || true
+                                '''
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Build Frontend App') {
+            steps {
+                script {
+                    docker.image('node:20-alpine').inside {
                         sh '''
                         cd client
-                        npm test || true
+                        npm run build
                         '''
                     }
                 }
@@ -116,7 +145,7 @@ pipeline {
             }
         }
 
-        stage('Update Deployment Images') {
+        stage('Deploy to Kubernetes') {
             steps {
                 sh '''
                 kubectl set image deployment/frontend frontend=$FRONTEND_IMAGE:latest -n $K8S_NAMESPACE
@@ -125,7 +154,7 @@ pipeline {
             }
         }
 
-        stage('Rollout Restart') {
+        stage('Restart Deployments') {
             steps {
                 sh '''
                 kubectl rollout restart deployment/frontend -n $K8S_NAMESPACE
@@ -161,7 +190,7 @@ pipeline {
         }
 
         failure {
-            echo ' Pipeline Failed'
+            echo 'Pipeline Failed'
         }
 
         always {
