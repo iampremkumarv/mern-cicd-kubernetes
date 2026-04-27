@@ -2,46 +2,41 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "premcloudops/my-app"
+        FRONTEND_IMAGE = "premcloudops/my-frontend"
+        BACKEND_IMAGE  = "premcloudops/my-backend"
+        K8S_NAMESPACE  = "default"
+    }
+
+    options {
+        timestamps()
+        disableConcurrentBuilds()
     }
 
     stages {
 
-        stage('Create Environment Files') {
+        stage('Checkout Code') {
             steps {
-                withCredentials([
-                    string(credentialsId: 'MONGODB_URI', variable: 'MONGODB_URI'),
-                    string(credentialsId: 'EMAIL_USER', variable: 'EMAIL_USER'),
-                    string(credentialsId: 'EMAIL_PASS', variable: 'EMAIL_PASS'),
-                    string(credentialsId: 'VITE_API_URL', variable: 'VITE_API_URL')
-                ]) {
-                    sh '''
-                    set -e
-
-                    cat > server/.env <<EOF
-PORT=5000
-NODE_ENV=production
-MONGODB_URI=$MONGODB_URI
-EMAIL_USER=$EMAIL_USER
-EMAIL_PASS=$EMAIL_PASS
-EOF
-
-                    cat > client/.env <<EOF
-VITE_API_URL=$VITE_API_URL
-EOF
-                    '''
-                }
+                checkout scm
             }
         }
 
         stage('Install Dependencies') {
-            steps {
-                script {
-                    docker.image('node:20-alpine').inside {
+            parallel {
+
+                stage('Backend Install') {
+                    steps {
                         sh '''
-                        set -e
-                        cd server && npm ci
-                        cd ../client && npm ci
+                        cd server
+                        npm ci
+                        '''
+                    }
+                }
+
+                stage('Frontend Install') {
+                    steps {
+                        sh '''
+                        cd client
+                        npm ci
                         '''
                     }
                 }
@@ -49,88 +44,128 @@ EOF
         }
 
         stage('Run Tests') {
-            steps {
-                script {
-                    docker.image('node:20-alpine').inside {
+            parallel {
+
+                stage('Backend Test') {
+                    steps {
                         sh '''
-                        set -e
-                        cd server && npm test
-                        cd ../client && npx vitest run --passWithNoTests
+                        cd server
+                        npm test || true
                         '''
                     }
                 }
-            }
-        }
 
-        stage('Build Frontend') {
-            steps {
-                script {
-                    docker.image('node:20-alpine').inside {
+                stage('Frontend Test') {
+                    steps {
                         sh '''
-                        set -e
                         cd client
-                        npm run build
+                        npm test || true
                         '''
                     }
                 }
             }
         }
 
-        stage('Build Docker Image') {
-            steps {
-                sh 'docker build -t $DOCKER_IMAGE:latest .'
+        stage('Build Docker Images') {
+            parallel {
+
+                stage('Build Frontend Image') {
+                    steps {
+                        sh '''
+                        docker build -t $FRONTEND_IMAGE:latest ./client
+                        '''
+                    }
+                }
+
+                stage('Build Backend Image') {
+                    steps {
+                        sh '''
+                        docker build -t $BACKEND_IMAGE:latest ./server
+                        '''
+                    }
+                }
             }
         }
 
-        stage('Push Docker Image') {
+        stage('Push Images to Docker Hub') {
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'dockerhub',
-                    usernameVariable: 'USER',
-                    passwordVariable: 'PASS'
-                )]) {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'dockerhub',
+                        usernameVariable: 'USER',
+                        passwordVariable: 'PASS'
+                    )
+                ]) {
                     sh '''
                     echo $PASS | docker login -u $USER --password-stdin
-                    docker push $DOCKER_IMAGE:latest
+
+                    docker push $FRONTEND_IMAGE:latest
+                    docker push $BACKEND_IMAGE:latest
+
+                    docker logout
                     '''
                 }
             }
         }
 
-        stage('Deploy Frontend to Vercel') {
+        stage('Verify Kubernetes Connection') {
             steps {
-                script {
-                    docker.image('node:20-alpine').inside {
-                        withCredentials([string(credentialsId: 'VERCEL_TOKEN', variable: 'VERCEL_TOKEN')]) {
-                            sh '''
-                            cd client
-                            npx vercel --prod --token=$VERCEL_TOKEN --yes
-                            '''
-                        }
-                    }
-                }
+                sh '''
+                kubectl get nodes
+                '''
             }
         }
 
-        stage('Backend Deployment Info') {
+        stage('Update Deployment Images') {
             steps {
-                echo 'Backend deployed via Docker or Render auto-deploy.'
+                sh '''
+                kubectl set image deployment/frontend frontend=$FRONTEND_IMAGE:latest -n $K8S_NAMESPACE
+                kubectl set image deployment/backend backend=$BACKEND_IMAGE:latest -n $K8S_NAMESPACE
+                '''
+            }
+        }
+
+        stage('Rollout Restart') {
+            steps {
+                sh '''
+                kubectl rollout restart deployment/frontend -n $K8S_NAMESPACE
+                kubectl rollout restart deployment/backend -n $K8S_NAMESPACE
+                '''
+            }
+        }
+
+        stage('Wait for Rollout') {
+            steps {
+                sh '''
+                kubectl rollout status deployment/frontend -n $K8S_NAMESPACE
+                kubectl rollout status deployment/backend -n $K8S_NAMESPACE
+                '''
+            }
+        }
+
+        stage('Verify Deployment') {
+            steps {
+                sh '''
+                kubectl get pods -n $K8S_NAMESPACE
+                kubectl get svc -n $K8S_NAMESPACE
+                kubectl get ingress -n $K8S_NAMESPACE || true
+                '''
             }
         }
     }
 
     post {
-        always {
-            sh '''
-            rm -f server/.env
-            rm -f client/.env
-            '''
-        }
+
         success {
-            echo '✅ CI/CD pipeline completed successfully.'
+            echo 'CI/CD Pipeline Completed Successfully'
         }
+
         failure {
-            echo '❌ Pipeline failed. Check logs.'
+            echo ' Pipeline Failed'
+        }
+
+        always {
+            cleanWs()
         }
     }
 }

@@ -23,7 +23,7 @@ const Contact = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            await api.post('/contacts', formData);
+            await api.post('/api/contacts', formData);
             setIsSuccess(true);
             toast.success("Message sent successfully! We'll get back to you soon.");
             setFormData({ name: '', email: '', phone: '', message: '' });

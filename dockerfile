@@ -1,28 +1,19 @@
-# ---------- Stage 1: Build Frontend ----------
-FROM node:20-alpine AS client-build
+FROM jenkins/jenkins:lts
 
-WORKDIR /app/client
-COPY client/package*.json ./
-RUN npm ci
-COPY client/ .
-RUN npm run build
+USER root
 
-# ---------- Stage 2: Setup Backend ----------
-FROM node:20-alpine
+RUN apt-get update && apt-get install -y \
+    curl \
+    git \
+    unzip \
+    ca-certificates
 
-WORKDIR /app
+# Install Docker CLI
+RUN curl -fsSL https://get.docker.com | sh
 
-# Copy backend
-COPY server/package*.json ./server/
-RUN cd server && npm ci
+# Install kubectl
+RUN curl -LO "https://dl.k8s.io/release/v1.35.1/bin/linux/amd64/kubectl" && \
+    install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl && \
+    rm kubectl
 
-COPY server ./server
-
-# Copy frontend build into backend (serve static)
-COPY --from=client-build /app/client/dist ./server/public
-
-WORKDIR /app/server
-
-EXPOSE 5000
-
-CMD ["node", "server.js"]
+USER jenkins

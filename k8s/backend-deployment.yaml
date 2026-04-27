@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: my-backend:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 5000
+
+          env:
+            - name: EMAIL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: email-secret
+                  key: EMAIL_USER
+
+            - name: EMAIL_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: email-secret
+                  key: EMAIL_PASS
+
+            - name: MONGODB_URI
+              value: mongodb://mongodb-service:27017/mydb
