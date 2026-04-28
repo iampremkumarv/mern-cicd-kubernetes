@@ -4,18 +4,22 @@ metadata:
   name: backend
 spec:
   replicas: 1
+
   selector:
     matchLabels:
       app: backend
+
   template:
     metadata:
       labels:
         app: backend
+
     spec:
       containers:
         - name: backend
           image: premcloudops/my-backend:latest
           imagePullPolicy: Always
+
           ports:
             - containerPort: 5000
 
@@ -34,3 +38,17 @@ spec:
 
             - name: MONGODB_URI
               value: mongodb://mongodb-service:27017/mydb
+
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 5000
+            initialDelaySeconds: 20
+            periodSeconds: 10

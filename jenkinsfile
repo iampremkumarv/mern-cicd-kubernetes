@@ -4,12 +4,17 @@ pipeline {
     environment {
         FRONTEND_IMAGE = "premcloudops/my-frontend"
         BACKEND_IMAGE  = "premcloudops/my-backend"
+        IMAGE_TAG      = "${BUILD_NUMBER}"
         K8S_NAMESPACE  = "default"
+
+        // 🔥 FIXED Kubernetes Access
+        KUBECONFIG = "/var/jenkins_home/.kube/config"
     }
 
     options {
         timestamps()
         disableConcurrentBuilds()
+        buildDiscarder(logRotator(numToKeepStr: '10'))
     }
 
     stages {
@@ -101,7 +106,7 @@ pipeline {
                 stage('Build Frontend Image') {
                     steps {
                         sh '''
-                        docker build -t $FRONTEND_IMAGE:latest ./client
+                        docker build -t $FRONTEND_IMAGE:$IMAGE_TAG -t $FRONTEND_IMAGE:latest ./client
                         '''
                     }
                 }
@@ -109,7 +114,7 @@ pipeline {
                 stage('Build Backend Image') {
                     steps {
                         sh '''
-                        docker build -t $BACKEND_IMAGE:latest ./server
+                        docker build -t $BACKEND_IMAGE:$IMAGE_TAG -t $BACKEND_IMAGE:latest ./server
                         '''
                     }
                 }
@@ -128,7 +133,10 @@ pipeline {
                     sh '''
                     echo $PASS | docker login -u $USER --password-stdin
 
+                    docker push $FRONTEND_IMAGE:$IMAGE_TAG
                     docker push $FRONTEND_IMAGE:latest
+
+                    docker push $BACKEND_IMAGE:$IMAGE_TAG
                     docker push $BACKEND_IMAGE:latest
 
                     docker logout
@@ -140,25 +148,27 @@ pipeline {
         stage('Verify Kubernetes Connection') {
             steps {
                 sh '''
+                echo "Using KUBECONFIG=$KUBECONFIG"
+                kubectl config current-context
                 kubectl get nodes
+                kubectl get ns
                 '''
             }
         }
 
-        stage('Deploy to Kubernetes') {
+        stage('Verify Secrets') {
             steps {
                 sh '''
-                kubectl set image deployment/frontend frontend=$FRONTEND_IMAGE:latest -n $K8S_NAMESPACE
-                kubectl set image deployment/backend backend=$BACKEND_IMAGE:latest -n $K8S_NAMESPACE
+                kubectl get secret email-secret -n $K8S_NAMESPACE
                 '''
             }
         }
 
-        stage('Restart Deployments') {
+        stage('Deploy New Images') {
             steps {
                 sh '''
-                kubectl rollout restart deployment/frontend -n $K8S_NAMESPACE
-                kubectl rollout restart deployment/backend -n $K8S_NAMESPACE
+                kubectl set image deployment/frontend frontend=$FRONTEND_IMAGE:$IMAGE_TAG -n $K8S_NAMESPACE
+                kubectl set image deployment/backend backend=$BACKEND_IMAGE:$IMAGE_TAG -n $K8S_NAMESPACE
                 '''
             }
         }
@@ -166,8 +176,8 @@ pipeline {
         stage('Wait for Rollout') {
             steps {
                 sh '''
-                kubectl rollout status deployment/frontend -n $K8S_NAMESPACE
-                kubectl rollout status deployment/backend -n $K8S_NAMESPACE
+                kubectl rollout status deployment/frontend -n $K8S_NAMESPACE --timeout=180s
+                kubectl rollout status deployment/backend -n $K8S_NAMESPACE --timeout=180s
                 '''
             }
         }
@@ -177,7 +187,6 @@ pipeline {
                 sh '''
                 kubectl get pods -n $K8S_NAMESPACE
                 kubectl get svc -n $K8S_NAMESPACE
-                kubectl get ingress -n $K8S_NAMESPACE || true
                 '''
             }
         }

@@ -16,4 +16,7 @@ RUN curl -LO "https://dl.k8s.io/release/v1.35.1/bin/linux/amd64/kubectl" && \
     install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl && \
     rm kubectl
 
+# Add jenkins user to docker group
+RUN groupadd -f docker && usermod -aG docker jenkins
+
 USER jenkins
