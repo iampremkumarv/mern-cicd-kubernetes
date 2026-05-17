@@ -23,7 +23,7 @@ const Contact = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            await api.post('/api/contacts', formData);
+            await api.post('/contacts', formData);
             setIsSuccess(true);
             toast.success("Message sent successfully! We'll get back to you soon.");
             setFormData({ name: '', email: '', phone: '', message: '' });
@@ -59,7 +59,7 @@ const Contact = () => {
                                 </div>
                                 <div>
                                     <h4 className="font-bold mb-1">Email Us</h4>
-                                    <p className="opacity-70">hello@intirior.studio</p>
+                                    <p className="opacity-70">interiorz@studio</p>
                                 </div>
                             </div>
                             <div className="flex gap-6 items-start">
@@ -68,7 +68,7 @@ const Contact = () => {
                                 </div>
                                 <div>
                                     <h4 className="font-bold mb-1">Call Us</h4>
-                                    <p className="opacity-70">+1 (234) 567-890</p>
+                                    <p className="opacity-70">+91 1234567890</p>
                                 </div>
                             </div>
                             <div className="flex gap-6 items-start">
@@ -77,7 +77,7 @@ const Contact = () => {
                                 </div>
                                 <div>
                                     <h4 className="font-bold mb-1">Visit Studio</h4>
-                                    <p className="opacity-70">123 Design Avenue, Manhattan, NY</p>
+                                    <p className="opacity-70">123 Design Avenue, Kumbakonam, Tamil Nadu</p>
                                 </div>
                             </div>
                         </div>
@@ -126,7 +126,7 @@ const Contact = () => {
                                             onChange={handleChange}
                                             required
                                             className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-6 focus:outline-none focus:border-gold transition-colors"
-                                            placeholder="John Doe"
+                                            placeholder="Enter your name"
                                         />
                                     </div>
                                     <div className="grid md:grid-cols-2 gap-6">
@@ -139,7 +139,7 @@ const Contact = () => {
                                                 onChange={handleChange}
                                                 required
                                                 className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-6 focus:outline-none focus:border-gold transition-colors"
-                                                placeholder="john@example.com"
+                                                placeholder="@example.com"
                                             />
                                         </div>
                                         <div>
@@ -150,7 +150,7 @@ const Contact = () => {
                                                 value={formData.phone}
                                                 onChange={handleChange}
                                                 className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-6 focus:outline-none focus:border-gold transition-colors"
-                                                placeholder="+1 234..."
+                                                placeholder="+91 234..."
                                             />
                                         </div>
                                     </div>

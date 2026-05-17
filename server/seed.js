@@ -8,43 +8,43 @@ const projects = [
     {
         title: 'Golden Sands Villa',
         category: 'Residential',
-        image: 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=800&q=80',
-        description: 'A luxury beachfront villa with open concept living and premium materials.',
+        image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=1200&auto=format&fit=crop',
+        description: 'Luxury beachfront living.',
         link: '#'
     },
     {
         title: 'Nexus Tech Office',
         category: 'Commercial',
-        image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80',
-        description: 'A futuristic workspace designed for collaboration and high productivity.',
+        image: 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?q=80&w=1200&auto=format&fit=crop',
+        description: 'Modern workspace design.',
         link: '#'
     },
     {
         title: 'Azure Penthouse',
         category: 'Residential',
-        image: 'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=800&q=80',
-        description: 'Sky-high elegance with panoramic city views and minimalist interior.',
+        image: 'https://images.unsplash.com/photo-1600585154526-990dced4db0d?q=80&w=1200&auto=format&fit=crop',
+        description: 'Sky-high elegance.',
         link: '#'
     },
     {
         title: 'The Minimalist Loft',
         category: 'Residential',
-        image: 'https://images.unsplash.com/photo-1616486341351-791bb44bcc4f?auto=format&fit=crop&w=800&q=80',
-        description: 'A converted industrial loft turned into a sanctuary of clean lines.',
+        image: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=1200&auto=format&fit=crop',
+        description: 'Clean lines and soft light.',
         link: '#'
     },
     {
         title: 'Velvet Lounge',
         category: 'Commercial',
-        image: 'https://images.unsplash.com/photo-1574362848149-11496d93a7c7?auto=format&fit=crop&w=800&q=80',
-        description: 'A boutique lounge experience featuring dark tones and plush textures.',
+        image: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=1200&auto=format&fit=crop',
+        description: 'Boutique hospitality.',
         link: '#'
     },
     {
         title: 'Eco Glass House',
         category: 'Architecture',
-        image: 'https://images.unsplash.com/photo-1449156003053-c3017e6c07b0?auto=format&fit=crop&w=800&q=80',
-        description: 'Merging architecture with nature using full-glass walls and sustainable wood.',
+        image: 'https://images.unsplash.com/photo-1511818966892-d7d671e672a2?q=80&w=1200&auto=format&fit=crop',
+        description: 'Sustainable architecture.',
         link: '#'
     }
 ];

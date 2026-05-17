@@ -48,13 +48,13 @@ const About = () => {
                     <div>
                         <h3 className="text-3xl font-bold mb-6 italic font-serif">"Design is not just what it looks like and feels like. Design is how it works."</h3>
                         <p className="text-lg opacity-80 mb-8">
-                            At INTIRIOR, we balance the delicate dance between form and function. Our studio is a collaborative
+                            At INTERIOR, we balance the delicate dance between form and function. Our studio is a collaborative
                             ecosystem where architects, designers, and craftsmen work in harmony to produce extraordinary results.
                         </p>
                         <div className="flex gap-4 items-center">
                             <div className="w-12 h-12 rounded-full glass flex items-center justify-center font-bold text-gold">JD</div>
                             <div>
-                                <p className="font-bold">ve   nom</p>
+                                <p className="font-bold">Prem</p>
                                 <p className="text-xs uppercase tracking-widest opacity-60">Principle Architect</p>
                             </div>
                         </div>

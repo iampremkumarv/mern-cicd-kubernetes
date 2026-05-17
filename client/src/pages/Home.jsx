@@ -111,7 +111,7 @@ const Home = () => {
                             <h2 className="text-gold font-medium tracking-widest mb-4 uppercase">Our Story</h2>
                             <h3 className="text-4xl font-bold mb-6">Designing for the <br /> modern visionary.</h3>
                             <p className="text-charcoal/70 dark:text-white/70 mb-8 leading-relaxed">
-                                Founded in 2010, INTIRIOR has been at the forefront of luxury design. We don't just decorate rooms;
+                                Founded in 2010, INTERIOR has been at the forefront of luxury design. We don't just decorate rooms;
                                 we curate experiences. Our philosophy is rooted in minimalism, quality, and the pursuit of perfection.
                             </p>
                             <button className="text-gold font-bold flex items-center gap-2 group">
